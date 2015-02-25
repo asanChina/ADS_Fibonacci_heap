@@ -1,10 +1,12 @@
 #include "FibonacciHeap.h"
 #include <stdlib.h>
 #include <iostream>
-#include <vector>
 using namespace std;
 
-//we perform action as the slide 12 page 6 indicated
+//anotherTree could be only one single node tree, or be a "min tree"
+//after insert, we will call "pariwiseCombine(...)", and in fact, we can also not call "pairwiseCombine(...)" in this "insert(...)"
+// If we call, the actual time complexity for "insert(...)" is not O(1), but O(logn). But pairwise combine make 
+// other function less amortized time complexity
 void FibonacciHeap::insert(TreeNode* anotherTree)
 {
 	anotherTree->parent = NULL;
@@ -16,13 +18,7 @@ void FibonacciHeap::insert(TreeNode* anotherTree)
 		return;
 	}
 	
-	TreeNode* rightsibling = minimumPointer->rightSibling;
-	minimumPointer->rightSibling = anotherTree;
-	anotherTree->leftSibling = minimumPointer;
-	anotherTree->rightSibling = rightsibling;
-	rightsibling->leftSibling = anotherTree;
-	
-
+	mergeTwoCircularLinkedList(minimumPointer, anotherTree);
 	//now need to reset the minimum pointer if necessary
 	if(anotherTree->data < minimumPointer->data)
 		minimumPointer = anotherTree;
@@ -33,6 +29,9 @@ void FibonacciHeap::insert(TreeNode* anotherTree)
 }
 
 
+//anotherHeap is another Fibonacci heap (remember, a min Fibonacci heap is a collection of min tree)
+//after meld, we will call "pairwiseCombine(...)"
+// to be honest, this "meld" function is almost the same with "insert", but there is still a little difference
 void FibonacciHeap::meld(FibonacciHeap& anotherHeap)
 {
 	if(anotherHeap.minimumPointer == NULL)
@@ -43,16 +42,7 @@ void FibonacciHeap::meld(FibonacciHeap& anotherHeap)
 		*(this) = anotherHeap;
 		return;
 	}
-		
-	//for below 6 statement, please draw correct figures to get the idea why you should cross
-	// the pointer to meld two doubly circular linked list
-	TreeNode* rightsibling = minimumPointer->rightSibling;
-	TreeNode* rightsibling1 = anotherHeap.minimumPointer->rightSibling;
-	minimumPointer->rightSibling = rightsibling1;
-	anotherHeap.minimumPointer->rightSibling = rightsibling; 
-	rightsibling->leftSibling = anotherHeap.minimumPointer;
-	rightsibling1->leftSibling = minimumPointer;
-	
+	mergeTwoCircularLinkedList(minimumPointer, anotherHeap.minimumPointer);
 	if(anotherHeap.minimumPointer->data < minimumPointer->data)
 		minimumPointer = anotherHeap.minimumPointer;
 	
@@ -88,23 +78,13 @@ bool FibonacciHeap::removeMin()
 	TreeNode* child = minimumPointer->child;
 	next->leftSibling = minimumPointer->leftSibling;
 	minimumPointer->leftSibling->rightSibling = next;
-
 	delete minimumPointer;
 	minimumPointer = next;
 
 
 	//now we need to insert children into the top level
 	if(child != NULL)
-	{
-		//for below 6 statements, please draw correct figures to get the idea
-		// why you should cross reset the pointers to meld two doubly circular linked list
-		TreeNode* rightsibling = minimumPointer->rightSibling;
-		TreeNode* rightsibling1 = child->rightSibling;
-		minimumPointer->rightSibling = rightsibling1;
-		child->rightSibling = rightsibling;
-		rightsibling->leftSibling = child;
-		rightsibling1->leftSibling = minimumPointer;
-	} 
+		mergeTwoCircularLinkedList(minimumPointer, child);
 
 	//do pairwise combine
 	pairwiseCombine(minimumPointer); //this "pairwiseCombine(...)" can not be commented out
@@ -144,16 +124,8 @@ bool FibonacciHeap::remove(TreeNode*& nodeInTheHeap)
 
 			//now we need insert the child of "nodeInTheHeap" to the top level doubly circular linked list
 			if(child != NULL)
-			{
-				//for below 6 statement, please draw correct figures to get the idea
-				// why we need to cross set the pointers
-				TreeNode* rightsibling = next->rightSibling;
-				TreeNode* rightsibling1 = child->rightSibling;
-				next->rightSibling = rightsibling1;
-				child->rightSibling = rightsibling;
-				rightsibling->leftSibling = child;
-				rightsibling1->leftSibling = next;
-			}
+				mergeTwoCircularLinkedList(minimumPointer, child);
+				
 			pairwiseCombine(minimumPointer);
 		}
 		return true;
@@ -165,14 +137,7 @@ bool FibonacciHeap::remove(TreeNode*& nodeInTheHeap)
 
 		//first try to put all children into the top level doubly circular linked list
 		if(child != NULL)
-		{
-			TreeNode* rightsibling = minimumPointer->rightSibling;
-			TreeNode* rightsibling1 = child->rightSibling;
-			minimumPointer->rightSibling = rightsibling1;
-			child->rightSibling = rightsibling;
-			rightsibling->leftSibling = child;
-			rightsibling1->leftSibling = minimumPointer;
-		}
+			mergeTwoCircularLinkedList(minimumPointer, child);
 		
 		//now delete "nodeInTheHeap" from its own doubly circular linked list
 		//be careful with when "nodeInTheHeap" is point by its parent
@@ -208,60 +173,10 @@ bool FibonacciHeap::remove(TreeNode*& nodeInTheHeap)
 		
 		//now do cascading cut
 		TreeNode* current = parent; 
-		while(current->parent != NULL && current->childCut == true) //current mustn't be node in top level doubly circular linked list
-		{
-			parent = current->parent;
-			TreeNode* next = current->rightSibling;
-			//try to pull out "current" from its doubly circular linked list
-			current->rightSibling = NULL;
-			if(next->rightSibling == NULL) //"current" is the only node in its doubly circular linked list
-			{
-				parent->child = NULL;
-				parent->degree--;
-				TreeNode* rightsibling = minimumPointer->rightSibling;
-				minimumPointer->rightSibling = current;
-				current->leftSibling = minimumPointer;
-				current->rightSibling = rightsibling;
-				rightsibling->leftSibling = current;
-			}
-			else //there are more than one nodes in current doubly circular linked list
-			{
-				//we should watch out whether "current" is pointed by "parent" or not
-				if(parent->child->rightSibling == NULL) //pointed by parent
-				{
-					//first pull current out from its own doubly linked list
-					next->leftSibling = current->leftSibling;
-					current->leftSibling->rightSibling = next;
-					//then reset child pointer and degree
-					parent->child = next;
-					parent->degree--;
-					//then put current into top level doubly circular linked list
-					TreeNode* rightsibling = minimumPointer->rightSibling;
-					minimumPointer->rightSibling = current;
-					current->leftSibling = minimumPointer;
-					current->rightSibling = rightsibling;
-					rightsibling->leftSibling = current;
-				}
-				else //not pointed by parent
-				{
-					//first pull current out of its own doubly circular linked list
-					next->leftSibling = current->leftSibling;
-					current->leftSibling->rightSibling = next;
-					//then decrease parent's degree
-					parent->degree--;
-					//then put current into top level doubly circular linked list
-					TreeNode* rightsibling = minimumPointer->rightSibling;
-					minimumPointer->rightSibling = current;
-					current->leftSibling = minimumPointer;
-					current->rightSibling = rightsibling;
-					rightsibling->leftSibling = current;
-				}
-			}
-			current = parent;
-		}
+		TreeNode* last = cascadingCut(current);
 		
-		if(current->childCut == false && current->parent != NULL)
-			current->childCut = true;
+		if(last != NULL && last->childCut == false && last->parent != NULL)
+			last->childCut = true;
 		
 		pairwiseCombine(minimumPointer);
 		return true;
@@ -269,6 +184,7 @@ bool FibonacciHeap::remove(TreeNode*& nodeInTheHeap)
 }
 
 
+//"nodeInTheHeap" is a pointer which points to a current node in the heap, "_newKey" is the key we are going to assign to it
 bool FibonacciHeap::decreaseKey(TreeNode* nodeInTheHeap, int _newKey)
 {
 	if(minimumPointer == NULL)
@@ -286,117 +202,94 @@ bool FibonacciHeap::decreaseKey(TreeNode* nodeInTheHeap, int _newKey)
 	{
 		TreeNode* current = nodeInTheHeap;
 		TreeNode* parent = current->parent;
-		//we first need to pull out current from its own doubly circular linked list and 
-		// put it into top level doubly circular linked list
-		TreeNode* next = current->rightSibling;
-		current->rightSibling = NULL;
-		if(next->rightSibling == NULL) //there is only one node in current's doubly circular linked list
-		{
-			//put current into the top level doubly circular linked list
-			TreeNode* rightsibling = minimumPointer->rightSibling;
-			minimumPointer->rightSibling = current;
-			current->leftSibling = minimumPointer;
-			current->rightSibling = rightsibling;
-			rightsibling->leftSibling = current;
-			//change something of the parent node
-			parent->child = NULL;
-			parent->degree--;
-		}
-		else //there are more than one nodes in current's doubly circular linked list
-		{
-			if(parent->child->rightSibling == NULL) //current is pointed by its parent
-			{
-				//we first pull current out of its own doubly circular linked list
-				next->leftSibling = current->leftSibling;
-				current->leftSibling->rightSibling = next;
-				//then put current into the top level doubly circular linked list
-				TreeNode* rightsibling = minimumPointer->rightSibling;
-				minimumPointer->rightSibling = current;
-				current->leftSibling = minimumPointer;
-				current->rightSibling = rightsibling;
-				rightsibling->leftSibling = current;
-				//then change child pointer and degree of parent
-				parent->child = next;
-				parent->degree--;
-			}
-			else //current is not pointed by its parent
-			{
-				//we first pull current out of its own doubly circular linked list
-				next->leftSibling = current->leftSibling;
-				current->leftSibling->rightSibling = next;
-				//then put current into the top level doubly circular linked list
-				TreeNode* rightsibling = minimumPointer->rightSibling;
-				minimumPointer->rightSibling = current;
-				current->leftSibling = minimumPointer;
-				current->rightSibling = rightsibling;
-				rightsibling->leftSibling = current;
-				//then change degree of parent
-				parent->degree--;
-			}
-		}
-		
+		extractAndInsert(current);
 		//now we may need to do cascading cut
 		current = parent; 
-		while(current->parent != NULL && current->childCut == true) //current mustn't be node in top level doubly circular linked list
-		{
-			parent = current->parent;
-			TreeNode* next = current->rightSibling;
-			//try to pull out "current" from its doubly circular linked list
-			current->rightSibling = NULL;
-			if(next->rightSibling == NULL) //"current" is the only node in its doubly circular linked list
-			{
-				parent->child = NULL;
-				parent->degree--;
-				TreeNode* rightsibling = minimumPointer->rightSibling;
-				minimumPointer->rightSibling = current;
-				current->leftSibling = minimumPointer;
-				rightsibling->leftSibling = current;
-				current->rightSibling = rightsibling;
-			}
-			else //there are more than one nodes in current doubly circular linked list
-			{
-				//we should watch out whether "current" is pointed by "parent" or not
-				if(parent->child->rightSibling == NULL) //pointed by parent
-				{
-					//first pull current out from its own doubly linked list
-					next->leftSibling = current->leftSibling;
-					current->leftSibling->rightSibling = next;
-					//then reset child pointer and degree
-					parent->child = next;
-					parent->degree--;
-					//then put current into top level doubly circular linked list
-					TreeNode* rightsibling = minimumPointer->rightSibling;
-					minimumPointer->rightSibling = current;
-					current->leftSibling = minimumPointer;
-					current->rightSibling = rightsibling;
-					rightsibling->leftSibling = current;
-				}
-				else //not pointed by parent
-				{
-					//first pull current out of its own doubly circular linked list
-					next->leftSibling = current->leftSibling;
-					current->leftSibling->rightSibling = next;
-					//then decrease parent's degree
-					parent->degree--;
-					//then put current into top level doubly circular linked list
-					TreeNode* rightsibling = minimumPointer->rightSibling;
-					minimumPointer->rightSibling = current;
-					current->leftSibling = minimumPointer;
-					current->rightSibling = rightsibling;
-					rightsibling->leftSibling = current;
-				}
-			}
-			current = parent;
-		}
+		TreeNode* last = cascadingCut(current);
 		
-		if(current->childCut == false && current->parent != NULL)
-			current->childCut = true;
+		if(last != NULL && last->childCut == false && last->parent != NULL)
+			last->childCut = true;
 		
 		pairwiseCombine(minimumPointer);
 	}
 }
 
+//for below function, please draw figures to get the idea why I write as this.
+//parameter "first" and "second" are guaranteed not to be "NULL" (caller guaranteed), but for safety
+// I check it again inside the function.
+// Please be aware, both "first" and "second" are pointers to doubly circular linked list: a doubly circular linked
+// list could have one node or more nodes
+void FibonacciHeap::mergeTwoCircularLinkedList(TreeNode* first, TreeNode* second)
+{
+	if(first == NULL || second == NULL) return;
+	TreeNode* rightSibling = first->rightSibling;
+	TreeNode* leftSibling = second->leftSibling;
+	first->rightSibling = second;
+	second->leftSibling = first;
+	rightSibling->leftSibling = leftSibling;
+	leftSibling->rightSibling = rightSibling;
+}
+	
+	
+	
+//this private function pull out "current" from its own doubly circular linked list, and then insert "current" into 
+// top level doubly circular linked list. 
+// Please be aware, "current" can be only one single node or the root of a "min tree"
+void FibonacciHeap::extractAndInsert(TreeNode* current)
+{
+	//if node's parent is already NULL, then means "node" already in the top level doubly circular linked list
+	if(current == NULL || current->parent == NULL) return;
+		
+	TreeNode* parent = current->parent;
+	TreeNode* next = current->rightSibling;
+	//try to pull out "current" from its doubly circular linked list
+	current->rightSibling = NULL;
+	if(next->rightSibling == NULL) //"current" is the only node in its doubly circular linked list
+	{
+		parent->child = NULL;
+		parent->degree--;
+		current->leftSibling = current->rightSibling = current;
+		mergeTwoCircularLinkedList(minimumPointer, current);
+	}
+	else //there are more than one nodes in current doubly circular linked list
+	{
+		//we should watch out whether "current" is pointed by "parent" or not
+		if(parent->child->rightSibling == NULL) //pointed by parent, then we must change parent's child pointer
+			parent->child = next;
+			
+		//first pull current out from its own doubly linked list
+		next->leftSibling = current->leftSibling;
+		current->leftSibling->rightSibling = next;
 
+		parent->degree--;
+		//then put current into top level doubly circular linked list
+		current->leftSibling = current->rightSibling = current;
+		mergeTwoCircularLinkedList(minimumPointer, current);
+	}
+}
+	
+	
+	
+//this private function is written to do cascading cut
+//param TreeNode current is the node we are going to do cascading cut
+//return TreeNode is the node which stop us
+// In fact "current" are guaranteed to have parent and have "childCut" as "true" (guaranteed by caller)
+// but I check this again inside the function.
+TreeNode* FibonacciHeap::cascadingCut(TreeNode* current)
+{
+	//if current is NULL or top level node or haven't been dropping child before, we return
+	if(current == NULL || current->parent == NULL || current->childCut == false)
+		return current;
+		
+	TreeNode* parent = NULL;
+	while(current->parent != NULL&& current->childCut == true)
+	{
+		parent = current->parent;
+		extractAndInsert(current);
+		current = parent;
+	}
+	return current;
+}
 
 		
 void FibonacciHeap::pairwiseCombine(TreeNode *temporaryPointer)
@@ -455,11 +348,7 @@ void FibonacciHeap::pairwiseCombine(TreeNode *temporaryPointer)
 						else
 						{
 							TreeNode* child = table[tempDegree]->child;
-							TreeNode* rightsibling = child->rightSibling;
-							child->rightSibling = current;
-							current->leftSibling = child;
-							current->rightSibling = rightsibling;
-							rightsibling->leftSibling = current;
+							mergeTwoCircularLinkedList(child, current);
 							current->parent = table[tempDegree];
 						}
 						(table[tempDegree]->degree)++;
@@ -479,11 +368,7 @@ void FibonacciHeap::pairwiseCombine(TreeNode *temporaryPointer)
 						else
 						{
 							TreeNode* child = current->child;
-							TreeNode* rightsibling = child->rightSibling;
-							child->rightSibling = table[tempDegree];
-							table[tempDegree]->leftSibling = child;
-							table[tempDegree]->rightSibling = rightsibling;
-							rightsibling->leftSibling = table[tempDegree];
+							mergeTwoCircularLinkedList(child, table[tempDegree]);
 							table[tempDegree]->parent = current;
 						}
 						(current->degree)++;

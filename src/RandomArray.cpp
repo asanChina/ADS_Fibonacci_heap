@@ -36,6 +36,7 @@ int RandomArray::searchMst(Graph &g)
 			}
 		}
 		
+		visited[index] = true;
 		count++;
 		totalLength += minimumLength;
 		

@@ -51,14 +51,14 @@ int main(int argc, char** argv)
 		clock_t Start, Time;
 		Start = clock();
 		RandomArray prim;
-		prim.searchMst(g);
+		int length1 = prim.searchMst(g);
 		Time = clock() - Start;
-		cout << "simple scheme: " << Time << "; ";
+		cout << "simple scheme length = " << length1 << ", clock ticks = " << Time << "; ";
 		Start = clock();
 		RandomFiHeap mst;
-		mst.searchMst(g);
+		int length2 = mst.searchMst(g);
 		Time = clock() - Start;
-		cout << "fi heap scheme: " << Time << ".\n";
+		cout << "fi heap scheme length = " << length2 << ", clock ticks = " << Time << ".\n";
 	}
 	else if(argc == 3)
 	{

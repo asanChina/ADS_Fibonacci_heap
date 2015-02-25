@@ -2,6 +2,8 @@
 #define _FIBONACCI_HEAP_H_
 
 #include "TreeNode.h"
+#include <vector> //we include this header file since "pairwiseCombine" would use vector
+using namespace std;
 
 
 //as we know, fibonacci heap is similar with fibonacci heap, the action fibonacci provide is
@@ -38,6 +40,14 @@ class FibonacciHeap{
 		bool decreaseKey(TreeNode* nodeInTheHeap, int _newKey); 
 
 	private:
+		//this function merge two doubly circular linked lists together
+		void mergeTwoCircularLinkedList(TreeNode* first, TreeNode* second);
+		//this function extract "current" from its own doubly circular linked list and insert it into top level
+		//doubly linked list
+		void extractAndInsert(TreeNode* current);
+		//this function do cascading cut, "current" is a node who lost its child just now
+		//return a node who is "current" ancestor and who haven't lost child before
+		TreeNode* cascadingCut(TreeNode* current);
 		//define pairwiseCombine as private function since this function only used by other functions
 		// users shouldn't know this function is working.
 		//This function would modify "minimumPointer" and "topLevelDegree"
