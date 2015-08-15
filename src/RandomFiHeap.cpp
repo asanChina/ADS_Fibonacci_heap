@@ -1,3 +1,6 @@
+/**
+* created by Pengjie Zhang: zhangpengjieufl@gmail.com
+*/
 #include <vector>
 #include <queue>
 #include "RandomFiHeap.h"
@@ -7,10 +10,10 @@ int RandomFiHeap::searchMst(Graph &g)
 {
 	int vertices = g.getNumOfVertices();
 	int edges = g.getNumOfEdges();
-	
+
 	vector<bool> visited(vertices, false);
 	vector<TreeNode*> help(vertices);
-	
+
 	FibonacciHeap fheap;
 	vector<pair<int, int> > neighbors = g.getNeighbors(0);
 	for(int i = 0; i < neighbors.size(); i++)
@@ -20,7 +23,7 @@ int RandomFiHeap::searchMst(Graph &g)
 		TreeNode *tmp = new TreeNode(data, identity);
 		help[identity] = tmp;
 		fheap.insert(tmp);
-	}		
+	}
 
 	visited[0] = true;
 	int count = 1;
@@ -35,7 +38,7 @@ int RandomFiHeap::searchMst(Graph &g)
 		count++;
 
 		fheap.removeMin();
-	
+
 		neighbors = g.getNeighbors(identity);
 		for(int i = 0; i < neighbors.size(); i++)
 		{
@@ -53,6 +56,6 @@ int RandomFiHeap::searchMst(Graph &g)
 					fheap.decreaseKey(help[v], cost);
 			}
 		}
-	}	
+	}
 	return totalLength;
 }

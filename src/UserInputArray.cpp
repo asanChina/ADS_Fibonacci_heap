@@ -1,3 +1,6 @@
+/**
+* created by Pengjie Zhang: zhangpengjieufl@gmail.com
+*/
 #include <vector>
 #include <iostream>
 #include "UserInputArray.h"
@@ -12,7 +15,7 @@ int UserInputArray::searchMst(Graph &g)
 	int edges = g.getNumOfEdges();
 	vector<bool> visited(vertices, false);
 	vector<pair<int, int> > distance(vertices, pair<int, int>(INT_MAX, -1));
-	
+
 	vector<pair<int, int> > neighbors = g.getNeighbors(0);
 	for(int i = 0; i < neighbors.size(); i++)
 	{

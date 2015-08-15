@@ -1,3 +1,6 @@
+/**
+*	created by Pengjie Zhang: zhangpengjieufl@gmail.com
+*/
 #ifndef _FIBONACCI_HEAP_H_
 #define _FIBONACCI_HEAP_H_
 
@@ -22,7 +25,7 @@ class FibonacciHeap{
 		}
 		//another overloaded constructor
 		FibonacciHeap(TreeNode* _minimumPointer):minimumPointer(_minimumPointer){}
-		
+
 	public:
 		//anotherTree could be only one single node tree, or be a "min tree"
 		//after insert, we will call "pariwiseCombine(...)", and in fact, we can also not call "pairwiseCombine(...)" in this "insert(...)"
@@ -37,7 +40,7 @@ class FibonacciHeap{
 		bool removeMin();
 		bool remove(TreeNode*& nodeInTheHeap); //this arbitrary remove accept an argument which is pointing to a existed node in the heap
 		//"nodeInTheHeap" is a pointer which points to a current node in the heap, "_newKey" is the key we are going to assign to it
-		bool decreaseKey(TreeNode* nodeInTheHeap, int _newKey); 
+		bool decreaseKey(TreeNode* nodeInTheHeap, int _newKey);
 
 	private:
 		//this function merge two doubly circular linked lists together
@@ -52,7 +55,7 @@ class FibonacciHeap{
 		// users shouldn't know this function is working.
 		//This function would modify "minimumPointer" and "topLevelDegree"
 		// in order to do pairwise combine, we need a "tree table" just as the slides indicate, we will use vector<TreeNode*> table as the table
-		void pairwiseCombine(TreeNode *temporayPointer); 
+		void pairwiseCombine(TreeNode *temporayPointer);
 	private:
 		TreeNode* minimumPointer;
 };

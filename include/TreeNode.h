@@ -1,12 +1,15 @@
+/**
+* create by Pengjie Zhang: zhangpengjieufl@gmail.com
+*/
 #ifndef _TREE_NODE_H_
 #define _TREE_NODE_H_
 
 #include <stdlib.h> //I include <stdlib.h> here because "NULL" is declared in <stdlib.h> header file
 
 //for this class, there is no need to provide another "TreeNode.cpp" file since all functions are defined inside class
-class TreeNode{	
+class TreeNode{
 		//when declare friend function or class, no need to concern whether is "public" or "private"
-		friend class FibonacciHeap; 
+		friend class FibonacciHeap;
 	public:
 		TreeNode(){
 			identity = -1;
@@ -15,7 +18,7 @@ class TreeNode{
 			child = NULL;
 			leftSibling = rightSibling = this;
 			parent = NULL;
-			childCut = false;	
+			childCut = false;
 		}
 		//constructor
 		TreeNode(int _data, int _identity):data(_data), identity(_identity){
@@ -59,7 +62,7 @@ class TreeNode{
 		//these two member variables are not must for Fibonacci heap
 		//but in order to use Fibonacci heap as the underlying data structure
 		//for Prim's algorithm, we need these two variables
-		int identity; ///the index of this vertex 
+		int identity; ///the index of this vertex
 		int neighbor; ///the index of the vertex that connnect this vertex in MST
 
 	private:

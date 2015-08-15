@@ -1,3 +1,6 @@
+/**
+* created by Pengjie Zhang: zhangpengjieufl@gmail.com
+*/
 #include "FibonacciHeap.h"
 #include <stdlib.h>
 #include <iostream>
@@ -5,25 +8,25 @@ using namespace std;
 
 //anotherTree could be only one single node tree, or be a "min tree"
 //after insert, we will call "pariwiseCombine(...)", and in fact, we can also not call "pairwiseCombine(...)" in this "insert(...)"
-// If we call, the actual time complexity for "insert(...)" is not O(1), but O(logn). But pairwise combine make 
+// If we call, the actual time complexity for "insert(...)" is not O(1), but O(logn). But pairwise combine make
 // other function less amortized time complexity
 void FibonacciHeap::insert(TreeNode* anotherTree)
 {
 	anotherTree->parent = NULL;
 	anotherTree->childCut = false;
-	
+
 	if(minimumPointer == NULL) //if the original fibonacci heap is empty
 	{
 		minimumPointer = anotherTree;
 		return;
 	}
-	
+
 	mergeTwoCircularLinkedList(minimumPointer, anotherTree);
 	//now need to reset the minimum pointer if necessary
 	if(anotherTree->data < minimumPointer->data)
 		minimumPointer = anotherTree;
-	
-	//even actual time complexity for inserting is O(1), but we still call "pairwiseCombine(...)". we can comment 
+
+	//even actual time complexity for inserting is O(1), but we still call "pairwiseCombine(...)". we can comment
 	// this statement out and achieve the same time complexity. But I include it here for personal preference
 	pairwiseCombine(minimumPointer);
 }
@@ -36,7 +39,7 @@ void FibonacciHeap::meld(FibonacciHeap& anotherHeap)
 {
 	if(anotherHeap.minimumPointer == NULL)
 		return;
-		
+
 	if(minimumPointer == NULL)
 	{
 		*(this) = anotherHeap;
@@ -45,11 +48,11 @@ void FibonacciHeap::meld(FibonacciHeap& anotherHeap)
 	mergeTwoCircularLinkedList(minimumPointer, anotherHeap.minimumPointer);
 	if(anotherHeap.minimumPointer->data < minimumPointer->data)
 		minimumPointer = anotherHeap.minimumPointer;
-	
+
 	pairwiseCombine(minimumPointer); //we can also comment out this sentence
 }
-		
-		
+
+
 TreeNode* FibonacciHeap::getMin()
 {
 	return minimumPointer; //caller of this function should be careful with situation when "minimumPointer" is NULL
@@ -61,7 +64,7 @@ bool FibonacciHeap::removeMin()
 
 	if(minimumPointer == NULL)
 		return false;
-		
+
 	//be careful with situation when there is only one min tree in the fibonacci heap (remember fibonacci heap is collection of min trees)
 	TreeNode* next = minimumPointer->rightSibling;
 	minimumPointer->rightSibling = NULL;
@@ -73,7 +76,7 @@ bool FibonacciHeap::removeMin()
 		pairwiseCombine(minimumPointer);
 		return true;
 	}
-	
+
 	//otherwise there are more than one min tree in top level
 	TreeNode* child = minimumPointer->child;
 	next->leftSibling = minimumPointer->leftSibling;
@@ -94,7 +97,7 @@ bool FibonacciHeap::removeMin()
 //pairwiseCombine called in this function can not be commented out
 bool FibonacciHeap::remove(TreeNode*& nodeInTheHeap)
 {
-	if(nodeInTheHeap == NULL) 
+	if(nodeInTheHeap == NULL)
 		return false;
 
 	if(nodeInTheHeap->parent == NULL) //only node in the top level can have NULL parent
@@ -125,7 +128,7 @@ bool FibonacciHeap::remove(TreeNode*& nodeInTheHeap)
 			//now we need insert the child of "nodeInTheHeap" to the top level doubly circular linked list
 			if(child != NULL)
 				mergeTwoCircularLinkedList(minimumPointer, child);
-				
+
 			pairwiseCombine(minimumPointer);
 		}
 		return true;
@@ -138,7 +141,7 @@ bool FibonacciHeap::remove(TreeNode*& nodeInTheHeap)
 		//first try to put all children into the top level doubly circular linked list
 		if(child != NULL)
 			mergeTwoCircularLinkedList(minimumPointer, child);
-		
+
 		//now delete "nodeInTheHeap" from its own doubly circular linked list
 		//be careful with when "nodeInTheHeap" is point by its parent
 		TreeNode* next = nodeInTheHeap->rightSibling;
@@ -170,14 +173,14 @@ bool FibonacciHeap::remove(TreeNode*& nodeInTheHeap)
 				nodeInTheHeap = NULL;
 			}
 		}
-		
+
 		//now do cascading cut
-		TreeNode* current = parent; 
+		TreeNode* current = parent;
 		TreeNode* last = cascadingCut(current);
-		
+
 		if(last != NULL && last->childCut == false && last->parent != NULL)
 			last->childCut = true;
-		
+
 		pairwiseCombine(minimumPointer);
 		return true;
 	}
@@ -193,7 +196,7 @@ bool FibonacciHeap::decreaseKey(TreeNode* nodeInTheHeap, int _newKey)
 		return false;
 	if(nodeInTheHeap->data <= _newKey)
 		return false;
-		
+
 	//now change the key
 	nodeInTheHeap->data = _newKey;
 	//only when nodeInTheHeap is not in top level doubly circular linked list and its
@@ -204,12 +207,12 @@ bool FibonacciHeap::decreaseKey(TreeNode* nodeInTheHeap, int _newKey)
 		TreeNode* parent = current->parent;
 		extractAndInsert(current);
 		//now we may need to do cascading cut
-		current = parent; 
+		current = parent;
 		TreeNode* last = cascadingCut(current);
-		
+
 		if(last != NULL && last->childCut == false && last->parent != NULL)
 			last->childCut = true;
-		
+
 		pairwiseCombine(minimumPointer);
 	}
 }
@@ -229,17 +232,17 @@ void FibonacciHeap::mergeTwoCircularLinkedList(TreeNode* first, TreeNode* second
 	rightSibling->leftSibling = leftSibling;
 	leftSibling->rightSibling = rightSibling;
 }
-	
-	
-	
-//this private function pull out "current" from its own doubly circular linked list, and then insert "current" into 
-// top level doubly circular linked list. 
+
+
+
+//this private function pull out "current" from its own doubly circular linked list, and then insert "current" into
+// top level doubly circular linked list.
 // Please be aware, "current" can be only one single node or the root of a "min tree"
 void FibonacciHeap::extractAndInsert(TreeNode* current)
 {
 	//if node's parent is already NULL, then means "node" already in the top level doubly circular linked list
 	if(current == NULL || current->parent == NULL) return;
-		
+
 	TreeNode* parent = current->parent;
 	TreeNode* next = current->rightSibling;
 	//try to pull out "current" from its doubly circular linked list
@@ -256,7 +259,7 @@ void FibonacciHeap::extractAndInsert(TreeNode* current)
 		//we should watch out whether "current" is pointed by "parent" or not
 		if(parent->child->rightSibling == NULL) //pointed by parent, then we must change parent's child pointer
 			parent->child = next;
-			
+
 		//first pull current out from its own doubly linked list
 		next->leftSibling = current->leftSibling;
 		current->leftSibling->rightSibling = next;
@@ -267,9 +270,9 @@ void FibonacciHeap::extractAndInsert(TreeNode* current)
 		mergeTwoCircularLinkedList(minimumPointer, current);
 	}
 }
-	
-	
-	
+
+
+
 //this private function is written to do cascading cut
 //param TreeNode current is the node we are going to do cascading cut
 //return TreeNode is the node which stop us
@@ -280,7 +283,7 @@ TreeNode* FibonacciHeap::cascadingCut(TreeNode* current)
 	//if current is NULL or top level node or haven't been dropping child before, we return
 	if(current == NULL || current->parent == NULL || current->childCut == false)
 		return current;
-		
+
 	TreeNode* parent = NULL;
 	while(current->parent != NULL&& current->childCut == true)
 	{
@@ -291,23 +294,23 @@ TreeNode* FibonacciHeap::cascadingCut(TreeNode* current)
 	return current;
 }
 
-		
+
 void FibonacciHeap::pairwiseCombine(TreeNode *temporaryPointer)
 {
 	//if the fibonacci heap is already empty, no need to do pairwise combine
-	if(temporaryPointer == NULL) 
+	if(temporaryPointer == NULL)
 		return;
-		
+
 	vector<TreeNode*> table(10); //we give the table 10 capacity for saving computation time, all entries would set to NULL
-	
-	//since our table's size is not "maxDegree+1", so we set this "highestDegree" to 
+
+	//since our table's size is not "maxDegree+1", so we set this "highestDegree" to
 	// help us save time when at last we collect min trees from the table.
-	int highestDegree = 0; 
-	
+	int highestDegree = 0;
+
 	//remember "maxDegree" is the max degree among all the top level min trees.
 	TreeNode *current = temporaryPointer->rightSibling;
 	temporaryPointer->rightSibling = NULL;
-	
+
 	while(current != NULL)
 	{
 		TreeNode* next = current->rightSibling;
@@ -342,7 +345,7 @@ void FibonacciHeap::pairwiseCombine(TreeNode *temporaryPointer)
 					{
 						if(table[tempDegree]->child == NULL)
 						{
-							table[tempDegree]->child = current;	
+							table[tempDegree]->child = current;
 							current->parent = table[tempDegree];
 						}
 						else
@@ -384,7 +387,7 @@ void FibonacciHeap::pairwiseCombine(TreeNode *temporaryPointer)
 		}
 		current = next;
 	}
-	
+
 	//now we need to collect all entries in the table and reset the "minimumPointer"
 	minimumPointer = NULL;
 	for(int i = 0; i <= highestDegree; i++)
@@ -410,15 +413,3 @@ void FibonacciHeap::pairwiseCombine(TreeNode *temporaryPointer)
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-

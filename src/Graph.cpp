@@ -1,3 +1,7 @@
+/**
+* created by Pengjie Zhang: zhangpengjieufl@gmail.com
+*/
+
 #include "Graph.h"
 #include <vector>
 #include <stdlib.h>
@@ -22,7 +26,7 @@ bool Graph::checkConnectedness()
 	int count = 1;
 	dfs(0, con, count);
 	connected = (count==numberOfVertices?true:false);
-	return connected;	
+	return connected;
 }
 
 void Graph::dfs(int index, vector<bool> &con, int &count)
@@ -47,7 +51,7 @@ bool Graph::buildRandomGraph(int vertices, int edges)
 	this->numberOfVertices = vertices;
 	this->numberOfEdges = edges;
 	this->udGraph = vector<vector<pair<int, int> > > (vertices);
-	
+
 	vector<vector<bool> > matrix(vertices, vector<bool>(vertices, false));
 
 	//get a seed according to system time
@@ -69,7 +73,7 @@ bool Graph::buildRandomGraph(int vertices, int edges)
 				udGraph[v1].push_back(p1);
 				pair<int, int> p2(v1, cost);
 				udGraph[v2].push_back(p2);
-			}			
+			}
 		}
 	}
 	return true;

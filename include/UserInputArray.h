@@ -1,3 +1,6 @@
+/**
+* created by Pengjie Zhang: zhangpengjieufl@gmail.com
+*/
 #ifndef _USER_INPUT_ARRAY_H_
 #define _USER_INPUT_ARRAY_H_
 
@@ -13,4 +16,3 @@ class UserInputArray{
 
 
 #endif
-

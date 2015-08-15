@@ -1,3 +1,7 @@
+/**
+* created by Pengjie Zhang: zhangpengjieufl@gmail.com
+*/
+
 #include <vector>
 #include "FibonacciHeap.h"
 #include "UserInputFiHeap.h"
@@ -11,10 +15,10 @@ int UserInputFiHeap::searchMst(Graph &g)
 
 	int vertices = g.getNumOfVertices();
 	int edges = g.getNumOfEdges();
-	
+
 	vector<bool> visited(vertices, false);
 	vector<TreeNode*> help(vertices);
-	
+
 	FibonacciHeap fheap;
 	vector<pair<int, int> > neighbors = g.getNeighbors(0);
 	for(int i = 0; i < neighbors.size(); i++)
@@ -24,7 +28,7 @@ int UserInputFiHeap::searchMst(Graph &g)
 		TreeNode *tmp = new TreeNode(cost, v, 0);
 		help[v] = tmp;
 		fheap.insert(tmp);
-	}		
+	}
 
 	visited[0] = true;
 	int count = 1;
@@ -63,7 +67,7 @@ int UserInputFiHeap::searchMst(Graph &g)
 				}
 			}
 		}
-	}	
+	}
 
 	cout << totalLength << endl;
 	for(int i = 0; i < spanningTreeEdges.size(); i++)
@@ -71,5 +75,3 @@ int UserInputFiHeap::searchMst(Graph &g)
 
 	return totalLength;
 }
-
-

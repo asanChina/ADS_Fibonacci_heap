@@ -1,3 +1,6 @@
+/**
+* created by Pengjie Zhang: zhangpengjieufl@gmail.com
+*/
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -25,7 +28,7 @@ void Usage()
 
 int main(int argc, char** argv)
 {
-	//I will handle four cases, 
+	//I will handle four cases,
 	//(1)random graph for fibonacci heap implementation
 	//(2)random graph for array implementation
 	//(3)file input for fibonacci heap implementation
@@ -34,12 +37,12 @@ int main(int argc, char** argv)
 	if(argc == 4)//means we will construct a random file
 	{
 		int vertices = atoi(argv[2]);
-		int density = atoi(argv[3]); 
+		int density = atoi(argv[3]);
 		int edges = vertices*(vertices-1)/2*density/100;
 
 		if(vertices <= 0 || density <= 0 || density > 100 || edges < vertices-1)
 			Usage();
-		
+
 		Graph g;
 		while(g.isConnected() == false)
 		{
@@ -84,8 +87,6 @@ int main(int argc, char** argv)
 	}
 	else
 		Usage();
-	
+
 	return 0;
 }
-
-

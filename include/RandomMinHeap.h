@@ -1,3 +1,6 @@
+/**
+* created by Pengjie Zhang: zhangpengjieufl@gmail.com
+*/
 #ifndef _RANDOM_MIN_HEAP_H_
 #define _RANDOM_MIN_HEAP_H_
 
@@ -9,7 +12,7 @@ class RandomMinHeap{
 		RandomMinHeap(){}
 		~RandomMinHeap(){}
 	public:
-		int searchMst(Graph &g);		
+		int searchMst(Graph &g);
 };
 
 #endif

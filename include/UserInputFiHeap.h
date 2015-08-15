@@ -1,3 +1,6 @@
+/**
+* created by Pengjie Zhang: zhangpengjieufl@gmail.com
+*/
 #ifndef _USER_INPUT_FI_HEAP_H_
 #define _USER_INPUT_FI_HEAP_H_
 
@@ -9,7 +12,7 @@ class UserInputFiHeap{
 		UserInputFiHeap(){}
 		~UserInputFiHeap(){}
 	public:
-		int searchMst(Graph &g);		
+		int searchMst(Graph &g);
 };
 
 #endif
